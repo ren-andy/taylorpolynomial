@@ -38,14 +38,15 @@ class poly:
 
     # Private coefficient to string conversion method
     def _coefficient_to_string(self, poly_instance):
-        poly_instance = self._remove_zeroes(poly_instance)
         equation = ''
         monomial = []
         for i, coefficient in enumerate(poly_instance): 
-            if(i == 0):
+            if i == 0 and coefficient !=0:
                 monomial.append(str(coefficient))
-            elif(i == 1):
+            elif i == 1 and coefficient != 0:
                 monomial.append(str(coefficient) + "x")
+            elif coefficient == 0:
+                continue
             else:
                 monomial.append(str(coefficient) + "x^" + str(i))       
         equation = "+".join(monomial)
