@@ -1,23 +1,33 @@
+# taylor_poly.py
+# may move poly class to its own doc
+# remove taylor_poly class? 
+# fix graph function 
+# clean up main function 
+
 import re 
 import math
-import scipy
-import scipy.misc
 import mpmath
-
+import numpy
+import matplotlib.pyplot as plotter
 
 # Polynomial class
 class poly:
+    """Class which instantiates a regular or Taylor's polynomial."""
     # Initializes polynomial
     def __init__(self, *varargs):
-        """ Initializes polynomial based on parameters passed, see @classmethods."""
+        """ Initializes polynomial based on parameters passed"""
         self.polynomial = []
-        if(len(varargs) == 1):
+        if len(varargs) == 1:
+            self.equation = varargs
             self.polynomial = self._string_to_coefficients(self.polynomial, *varargs)
-        else: 
+        elif len(varargs) == 3: 
             self.function_name = varargs[0]
             self.center = varargs[1]
             self.degree = varargs[2]
-            self.polynomial = self._generate_poly_coefficients(self.polynomial, self.function_name, self.center, self.degree)
+            self.equation = ''
+            self.monomial = [] # Array which includes all monomials
+            # Generate taylor polynomial
+            self._generate_poly_coefficients(self.function_name, self.center, self.degree)
 
     # If taylor polynomial is needed
     #@classmethod 
@@ -29,46 +39,43 @@ class poly:
     #def init_reg_poly(cls, *equation):
     #    return cls(*equation)
    
-    # Private string to coefficient conversion method
     def _string_to_coefficients(self, *varargs):
+        """Private method which converts passed strings to coefficient."""
         coefficients = []
         for i in varargs: 
             coefficients.append(re.search('[0-9]*',i))
         return varargs
 
-    # Private coefficient to string conversion method
-    def _coefficient_to_string(self, poly_instance):
-        equation = ''
-        monomial = []
-        for i, coefficient in enumerate(poly_instance): 
-            if i == 0 and coefficient !=0:
-                monomial.append(str(coefficient))
-            elif i == 1 and coefficient != 0:
-                monomial.append(str(coefficient) + "x")
-            elif coefficient == 0:
+    def _coefficient_to_string(self):
+        """Private method which converts coefficient array to readable string."""
+        temp_monomial = []
+        for i, coefficient in enumerate(self.polynomial): 
+            if i == 0 and coefficient != 0: # Special 0th degree term case 
+                temp_monomial.append(str(coefficient))
+                self.monomial.append(str(coefficient))
+            elif i == 1 and coefficient != 0: # Presents 1st degree term withou "^1" 
+                temp_monomial.append(str(coefficient) + "x")
+                self.monomial.append(str(coefficient) + "x")
+            elif coefficient == 0: # Removes 0 terms 
+                self.monomial.append(str(0))
                 continue
             else:
-                monomial.append(str(coefficient) + "x^" + str(i))       
-        equation = "+".join(monomial)
-        return equation
+                temp_monomial.append(str(coefficient) + "x^" + str(i))
+                self.monomial.append(str(coefficient) + "x^" + str(i))       
+        self.equation = "+".join(temp_monomial)
 
-    def _remove_zeroes(self, poly_instance):
-        poly_instance = filter(lambda i: i != 0, poly_instance)
-        return poly_instance
+    #def _remove_zeroes(self, poly_instance):
+    #    poly_instance = filter(lambda i: i != 0, poly_instance)
+    #    return poly_instance
     
-    # generates coefficients based on degree 
-    def _generate_poly_coefficients(self, poly_instance, function_name, center, degree):
-            #poly_instance.append(0)
-            temp = 3
-            for i in range(0, degree+1):  
-                print(i)
-                #poly_instance.append(round(scipy.misc.derivative(function_name, center, dx=1e-6, n=i, order = temp)))
-                poly_instance.append(round(mpmath.diff(mpmath.cos, center, i)))
-                #poly_instance = list(mpmath.diffs(mpmath.sin, 0, 5))
-                #poly_instance = mpmath.taylor(mpmath.sin, center, 5)
-                temp = temp+4
-                print (poly_instance)
-            return poly_instance
+    def _generate_poly_coefficients(self, function_name, center, degree):
+        """Generates coefficients for taylor polynomial based on given degree and center."""
+        for i in range(0, degree+1):  
+            #print(i)
+            self.polynomial.append(round(mpmath.diff(function_name, center, i)))
+            #poly_instance = list(mpmath.diffs(mpmath.sin, 0, 5))
+            #poly_instance = mpmath.taylor(mpmath.sin, center, 5)
+            #print(self.polynomial)
 
     # Performs operations on array 
     def _operation(self, function, operation, value):
@@ -78,46 +85,81 @@ class poly:
             result = (function(value + h) - function(value)) / h
         elif(operation == 'integral'):
             pass
+        elif(operation == 'add'):
+            pass
+        elif(operation == 'subtract'):
+            pass
         return result
 
-    # Solves the polynomial based on an x value
-    def solve(self, poly_instance, x):
+    def solve(self, x):
+        """Solves the polynomial based on passed x argument."""
         result = 0 
+        for i, coefficient in enumerate(self.polynomial):
+            result += coefficient * x ** i 
         return result
 
-    # Radius of convergence
-    def radius_of_convergence(self):
-        pass
+    def get_degree(self):
+        """ Returns degree of polynomial."""
+        return self.degree
 
     def __str__(self):
-        #return str(self.polynomial)
-        return self._coefficient_to_string(self.polynomial)
+        self._coefficient_to_string()
+        return self.equation
 
     def __repr__(self):
-        #return self.polynomial
         return str(self)
         
     def __getitem__(self, index):
-        return self.polynomial[index]
+        """Usage: <poly_instance>[i]"""
+        return self.monomial[index]
 
     def __len__(self):
         return len(self.polynomial)
 
-    #print function 
 
-
-# Taylor polynomial class
+# Taylor polynomial class <might remove> 
 class taylor_poly:
     def __init__(self, function_name, center, degree):
         self.poly_instance = poly(function_name, center, degree)
-        self.poly_instance.polynomial = self.poly_instance._generate_poly_coefficients(self.poly_instance.polynomial, function_name, center, degree)
 
+    def solve(self, x):
+        """Solves the polynomial based on passed x argument."""
+        self.poly_instance.solve(x)
+
+    def radius_of_convergence(self):
+        """Returns the radius of convergence of the taylor polynomial."""
+        pass
+
+def graph_polynomial(poly, function):
+    vector_function = numpy.vectorize(poly.solve)
+
+    x = numpy.linspace(-2, 2, 1000)
+    y3 = vector_function(x) + x**101
+    y1= x-x**3+x**5-x**7+x**9-x**11+x**13-x**15+x**17-x**19+x**21-x**23+x**25
+    y2= poly.solve(x)
+    y = numpy.sin(x)
+
+    plotter.plot(x, y, label="sin(x)")
+    plotter.plot(x, y1, label= "Degree 26")
+    plotter.plot(x, y2, label= "Degree " + str(poly.degree))
+    plotter.plot(x, y3, label= "Degree 101")
+    plotter.ylim([-2, 2])
+    plotter.legend()
+    plotter.show()
+    
 def sin(x):
-    return math.sin(x)
+    return mpmath.sin(x)
+
+def cos(x):
+    return mpmath.cos(x)
 
 def main():
-    test = poly(sin, 0, 10)
+    test = poly(sin, 0, 100)
     print(str(test))
+    print(test[10])
+
+    #print(test.solve(10))
+    graph_polynomial(test, sin)
 
 main()
 
