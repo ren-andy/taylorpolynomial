@@ -63,6 +63,7 @@ class poly:
                 temp_monomial.append(str(coefficient) + "x^" + str(i))
                 self.monomial.append(str(coefficient) + "x^" + str(i))       
         self.equation = "+".join(temp_monomial)
+        self.equation = self.equation.replace("+-", "-")
 
     #def _remove_zeroes(self, poly_instance):
     #    poly_instance = filter(lambda i: i != 0, poly_instance)
