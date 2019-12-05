@@ -16,16 +16,17 @@ class poly:
     # Initializes polynomial
     def __init__(self, *varargs):
         """ Initializes polynomial based on parameters passed"""
-        self.polynomial = []
+        self.polynomial = [] # Technically the coefficient array
+        self.monomial = [] # Array which includes all monomials
         if len(varargs) == 1:
             self.equation = varargs
+            self.degree = 0
             self.polynomial = self._string_to_coefficients(self.polynomial, *varargs)
         elif len(varargs) == 3: 
             self.function_name = varargs[0]
             self.center = varargs[1]
             self.degree = varargs[2]
             self.equation = ''
-            self.monomial = [] # Array which includes all monomials
             # Generate taylor polynomial
             self._generate_poly_coefficients(self.function_name, self.center, self.degree)
 
