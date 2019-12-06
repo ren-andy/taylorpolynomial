@@ -1,6 +1,7 @@
 # ./src/poly.py
 # Author: Andy Ren (ren-andy)
 
+import re
 import math
 import mpmath
 import numpy
