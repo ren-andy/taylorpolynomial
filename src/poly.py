@@ -89,7 +89,7 @@ class poly:
             return "x"
 
     def _generate_poly_coefficients(self, function, center, degree):
-        """Generates coefficients for taylor polynomial based on given degree and center."""
+        """Private method which generates coefficients for the Taylor polynomial based on given degree and center."""
         for i in range(0, degree + 1):
             # Each "i" term contains the function's ith derivative value at x=center,
             # divded by the ith factorial.
@@ -132,7 +132,8 @@ class poly:
         return result
 
     def graph(self, function, range):
-        """Graphs the Taylor polynomial and compares it with its actual function."""
+        """Graphs the Taylor polynomial and compares it with its actual function.
+            \nNote: Use the the numpy module instead of the mpmath module as the passed function. """
         vector_function = numpy.vectorize(self.solve)
 
         x = numpy.linspace(-range, range, 10000)
